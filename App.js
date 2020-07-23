@@ -1,11 +1,61 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, {useState} from 'react';
+import { StyleSheet, View, FlatList, Button } from 'react-native';
+
+import GoalInput from './components/GoalInput'
+import GoalItem from './components/GoalItem'
 
 export default function App() {
+  
+  const [courseGoal, setCourseGoal] = useState([]);
+  const [isAddModal, setIsAddModal] = useState(false);
+  
+  const addGoalHandler = goalTitle => {
+   
+    setCourseGoal(courseGoal => [ 
+                                  ...courseGoal, 
+                                  { id: Math.random().toString(), value: goalTitle }
+                                ]);
+    
+    //Implementing state functions for 2 different states ensures that the app is not rerendered.
+    setIsAddModal(false)
+
+    console.log(goalTitle)
+  }
+
+  const removeGoalHandler = goalId => {
+    setCourseGoal(goals => {
+      return goals.filter((currentGoal) => currentGoal.id !== goalId );
+    });
+    console.log(goalId)
+  }
+
+  const cancelGoalHandler = () => {
+    setIsAddModal(false);
+  }
+// id={itemData.item.id}
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+      <Button title='Add new Goal'onPress={() => setIsAddModal(true) }/>
+     <GoalInput 
+      visible={isAddModal} 
+      onAddGoal={addGoalHandler} 
+      onCancel={cancelGoalHandler}
+      />
+      <FlatList 
+        keyExtractor={(item, index) => item.id}
+        data={courseGoal}
+        renderItem={itemData => (
+          <GoalItem 
+          onDelete={removeGoalHandler.bind(this, itemData.item.id)} 
+          title={itemData.item.value}
+          />
+        )}
+      />
+
+     {/* <ScrollView>
+       {courseGoal.map((result) => <View key={result} style={styles.listItems}><Text >{result}</Text></View>)}
+     </ScrollView> */}
       <StatusBar style="auto" />
     </View>
   );
@@ -13,9 +63,6 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 50
   },
 });
